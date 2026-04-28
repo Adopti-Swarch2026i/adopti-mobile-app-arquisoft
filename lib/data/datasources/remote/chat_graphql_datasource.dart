@@ -1,4 +1,4 @@
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:graphql_flutter/graphql_flutter.dart' hide ServerException;
 
 import '../../../core/errors/exceptions.dart';
 import '../../models/conversation_model.dart';

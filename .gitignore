@@ -1,1 +1,41 @@
-MobilApp/
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.g.dart
+*.freezed.dart
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Android
+/android/.gradle
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/key.properties
+*.jks
+
+# iOS (si se agrega)
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+
+# Env
+.env
+*.env
+!*.env.example
+
+# Misc
+*.log
+*.swp
+.DS_Store

@@ -160,7 +160,7 @@ class PetListNotifier extends AsyncNotifier<PetListState> {
         isLoadingMore: false,
       ));
     } catch (err, stack) {
-      state = AsyncValue.error(err, stack).copyWithPrevious(
+      state = AsyncValue<PetListState>.error(err, stack).copyWithPrevious(
         AsyncValue.data(current.copyWith(isLoadingMore: false)),
       );
     }

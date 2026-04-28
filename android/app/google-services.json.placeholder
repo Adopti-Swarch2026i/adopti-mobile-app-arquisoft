@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "876747994196",
+    "project_id": "adoptiswarch-dc4da",
+    "storage_bucket": "adoptiswarch-dc4da.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "REPLACE_WITH_FIREBASE_CONSOLE_VALUE",
+        "android_client_info": {
+          "package_name": "com.adopti.adopti_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "REPLACE_WITH_FIREBASE_CONSOLE_VALUE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

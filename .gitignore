@@ -22,6 +22,7 @@ build/
 /android/app/profile
 /android/app/release
 /android/key.properties
+/android/app/google-services.json
 *.jks
 
 # iOS (si se agrega)

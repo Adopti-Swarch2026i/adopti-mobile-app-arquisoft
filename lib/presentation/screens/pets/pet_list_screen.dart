@@ -70,7 +70,6 @@ class _PetListScreenState extends ConsumerState<PetListScreen> {
                     final pet = state.pets[index];
                     return PetCard(
                       pet: pet,
-                      trailing: StatusBadge(status: pet.status),
                       onTap: () => context.push('/pets/${pet.id}'),
                     );
                   },

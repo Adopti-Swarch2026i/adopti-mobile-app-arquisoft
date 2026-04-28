@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/pet.dart';
+import '../../domain/entities/report.dart';
 import '../../domain/repositories/pet_repository.dart';
 import 'dependency_injection.dart';
 
@@ -20,6 +21,24 @@ class PetListParams {
     this.page = 1,
     this.pageSize = 20,
   });
+
+  PetListParams copyWith({
+    PetStatus? status,
+    PetSpecies? type,
+    String? city,
+    String? search,
+    int? page,
+    int? pageSize,
+  }) {
+    return PetListParams(
+      status: status ?? this.status,
+      type: type ?? this.type,
+      city: city ?? this.city,
+      search: search ?? this.search,
+      page: page ?? this.page,
+      pageSize: pageSize ?? this.pageSize,
+    );
+  }
 }
 
 class SearchPetsParams {
@@ -41,6 +60,10 @@ class SearchPetsParams {
     this.pageSize = 20,
   });
 }
+
+final activeFiltersProvider = StateProvider<PetListParams>((ref) {
+  return const PetListParams();
+});
 
 final petListProvider = FutureProvider.family<PaginatedPets, PetListParams>(
   (ref, params) async {
@@ -83,3 +106,10 @@ final petStatsProvider = FutureProvider<Map<String, int>>((ref) async {
   final repo = ref.watch(petRepositoryProvider);
   return repo.getStats();
 });
+
+final createReportProvider = FutureProvider.family<Pet, ReportInput>(
+  (ref, input) async {
+    final repo = ref.watch(petRepositoryProvider);
+    return repo.createReport(input);
+  },
+);

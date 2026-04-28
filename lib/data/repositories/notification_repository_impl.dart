@@ -23,7 +23,15 @@ class NotificationRepositoryImpl implements NotificationRepository {
     int page = 1,
     int pageSize = 20,
   }) async {
-    // TODO: implement when endpoint is ready
-    throw UnimplementedError();
+    try {
+      final result = await _dataSource.getNotifications(
+        userId: userId,
+        page: page,
+        pageSize: pageSize,
+      );
+      return result.toEntity();
+    } on ServerException catch (e) {
+      throw ServerFailure(e.message);
+    }
   }
 }

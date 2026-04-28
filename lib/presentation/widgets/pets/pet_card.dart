@@ -5,23 +5,84 @@ import '../../../domain/entities/pet.dart';
 class PetCard extends StatelessWidget {
   final Pet pet;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
-  const PetCard({super.key, required this.pet, this.onTap});
+  const PetCard({super.key, required this.pet, this.onTap, this.trailing});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: ListTile(
-        leading: pet.imageUrls.isNotEmpty
-            ? CircleAvatar(
-                backgroundImage: NetworkImage(pet.imageUrls.first),
-              )
-            : const CircleAvatar(child: Icon(Icons.pets)),
-        title: Text(pet.name),
-        subtitle: Text('${pet.status.name} - ${pet.city}'),
-        trailing: const Icon(Icons.chevron_right),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: pet.imageUrls.isNotEmpty
+                    ? Image.network(
+                        pet.imageUrls.first,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _placeholder(),
+                      )
+                    : _placeholder(),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      pet.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${pet.breed} • ${pet.city}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      pet.status.name.toUpperCase(),
+                      style: TextStyle(
+                        color: _statusColor(pet.status),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (trailing != null) trailing!,
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: Colors.grey.shade200,
+      child: const Icon(Icons.pets, color: Colors.grey),
+    );
+  }
+
+  Color _statusColor(PetStatus status) {
+    return switch (status) {
+      PetStatus.lost => Colors.red,
+      PetStatus.found => Colors.green,
+      PetStatus.reunited => Colors.orange,
+    };
   }
 }

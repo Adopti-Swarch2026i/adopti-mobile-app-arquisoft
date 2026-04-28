@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../domain/entities/pet.dart';
 import '../../providers/pets_provider.dart';
+import '../../widgets/pets/pet_card.dart';
+import '../../widgets/pets/status_badge.dart';
+import '../../widgets/common/loading_indicator.dart';
+import '../../widgets/common/error_widget.dart';
 
 class PetListScreen extends ConsumerWidget {
   const PetListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final petsAsync = ref.watch(
-      searchPetsProvider(const SearchPetsParams()),
-    );
+    final filters = ref.watch(activeFiltersProvider);
+    final petsAsync = ref.watch(petListProvider(filters));
 
     return Scaffold(
       appBar: AppBar(
@@ -18,9 +23,7 @@ class PetListScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // TODO: navigate to PetFilterScreen
-            },
+            onPressed: () => context.push('/pets/filter'),
           ),
         ],
       ),
@@ -30,34 +33,26 @@ class PetListScreen extends ConsumerWidget {
             return const Center(child: Text('No hay mascotas reportadas'));
           }
           return ListView.builder(
+            padding: const EdgeInsets.all(8),
             itemCount: paginated.results.length,
             itemBuilder: (context, index) {
               final pet = paginated.results[index];
-              return ListTile(
-                leading: pet.imageUrls.isNotEmpty
-                    ? CircleAvatar(
-                        backgroundImage: NetworkImage(pet.imageUrls.first),
-                      )
-                    : const CircleAvatar(child: Icon(Icons.pets)),
-                title: Text(pet.name),
-                subtitle: Text('${pet.status.name} - ${pet.city}'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: navigate to PetDetailScreen
-                },
+              return PetCard(
+                pet: pet,
+                trailing: StatusBadge(status: pet.status),
+                onTap: () => context.push('/pets/${pet.id}'),
               );
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Error: $error'),
+        loading: () => const Center(child: LoadingIndicator()),
+        error: (error, stack) => AppErrorWidget(
+          message: error.toString(),
+          onRetry: () => ref.invalidate(petListProvider),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: navigate to PetCreateScreen
-        },
+        onPressed: () => context.push('/pets/create'),
         child: const Icon(Icons.add),
       ),
     );

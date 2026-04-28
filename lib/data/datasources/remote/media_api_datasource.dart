@@ -22,4 +22,18 @@ class MediaApiDataSource {
       throw ServerException(e.message ?? 'Failed to upload image');
     }
   }
+
+  Future<MediaUploadResultModel> getCachedImage(String hash) async {
+    try {
+      // Verify the cached image exists via HEAD request
+      await _dio.head<Map<String, dynamic>>('/media/$hash');
+      return MediaUploadResultModel(
+        url: '${_dio.options.baseUrl}/media/$hash',
+        thumbnailUrl: '${_dio.options.baseUrl}/media/$hash/thumbnail',
+        hash: hash,
+      );
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to verify cached image');
+    }
+  }
 }

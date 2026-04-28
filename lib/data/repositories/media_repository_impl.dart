@@ -20,7 +20,11 @@ class MediaRepositoryImpl implements MediaRepository {
 
   @override
   Future<MediaUploadResult> getCachedImage(String hash) async {
-    // TODO: implement cache retrieval if needed
-    throw UnimplementedError();
+    try {
+      final result = await _dataSource.getCachedImage(hash);
+      return result.toEntity();
+    } on ServerException catch (e) {
+      throw ServerFailure(e.message);
+    }
   }
 }

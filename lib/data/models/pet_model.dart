@@ -8,6 +8,15 @@ class PetModel {
   final String? color;
   final String? age;
   final List<String> imageUrls;
+  final String? description;
+  final String? location;
+  final String? city;
+  final String? status;
+  final String? reporterId;
+  final String? reporterName;
+  final String? contactPhone;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const PetModel({
     required this.id,
@@ -17,6 +26,15 @@ class PetModel {
     this.color,
     this.age,
     required this.imageUrls,
+    this.description,
+    this.location,
+    this.city,
+    this.status,
+    this.reporterId,
+    this.reporterName,
+    this.contactPhone,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory PetModel.fromJson(Map<String, dynamic> json) => PetModel(
@@ -30,6 +48,19 @@ class PetModel {
                 ?.map((e) => e as String)
                 .toList() ??
             const [],
+        description: json['description'] as String?,
+        location: json['location'] as String?,
+        city: json['city'] as String?,
+        status: json['status'] as String?,
+        reporterId: json['reporter_id'] as String? ?? json['owner_id'] as String?,
+        reporterName: json['reporter_name'] as String? ?? json['owner_name'] as String?,
+        contactPhone: json['contact_phone'] as String? ?? json['owner_phone'] as String?,
+        createdAt: json['created_at'] != null
+            ? DateTime.tryParse(json['created_at'] as String)
+            : null,
+        updatedAt: json['updated_at'] != null
+            ? DateTime.tryParse(json['updated_at'] as String)
+            : null,
       );
 
   Pet toEntity() => Pet(
@@ -39,22 +70,30 @@ class PetModel {
         breed: breed ?? '',
         color: color ?? '',
         age: age ?? '',
-        description: '',
-        status: PetStatus.lost,
+        description: description ?? '',
+        status: _parseStatus(status ?? 'lost'),
         imageUrls: imageUrls,
-        location: '',
-        city: '',
-        date: DateTime.now(),
-        reporterId: '',
-        reporterName: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        location: location ?? '',
+        city: city ?? '',
+        date: createdAt ?? DateTime.now(),
+        reporterId: reporterId ?? '',
+        reporterName: reporterName ?? '',
+        contactPhone: contactPhone,
+        createdAt: createdAt ?? DateTime.now(),
+        updatedAt: updatedAt ?? DateTime.now(),
       );
 
   static PetSpecies _parseSpecies(String value) {
     return PetSpecies.values.firstWhere(
       (e) => e.name == value.toLowerCase(),
       orElse: () => PetSpecies.other,
+    );
+  }
+
+  static PetStatus _parseStatus(String value) {
+    return PetStatus.values.firstWhere(
+      (e) => e.name == value.toLowerCase(),
+      orElse: () => PetStatus.lost,
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../domain/entities/pet.dart';
@@ -23,12 +24,18 @@ class PetCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: pet.imageUrls.isNotEmpty
-                    ? Image.network(
-                        pet.imageUrls.first,
+                    ? CachedNetworkImage(
+                        imageUrl: pet.imageUrls.first,
                         width: 80,
                         height: 80,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _placeholder(),
+                        placeholder: (_, __) => Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey.shade200,
+                          child: const Icon(Icons.image, color: Colors.grey),
+                        ),
+                        errorWidget: (_, __, ___) => _placeholder(),
                       )
                     : _placeholder(),
               ),

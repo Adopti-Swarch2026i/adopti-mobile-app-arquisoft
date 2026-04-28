@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -128,10 +129,14 @@ class _ImageGallery extends StatelessWidget {
       child: PageView.builder(
         itemCount: imageUrls.length,
         itemBuilder: (context, index) {
-          return Image.network(
-            imageUrls[index],
+          return CachedNetworkImage(
+            imageUrl: imageUrls[index],
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
+            placeholder: (_, __) => Container(
+              color: Colors.grey.shade200,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+            errorWidget: (_, __, ___) => Container(
               color: Colors.grey.shade200,
               child: const Center(child: Icon(Icons.broken_image)),
             ),

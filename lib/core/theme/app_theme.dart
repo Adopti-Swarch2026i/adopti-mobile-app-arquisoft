@@ -73,6 +73,22 @@ class AppTheme {
             ),
           ),
         ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: AppColors.backgroundLight,
+          indicatorColor: AppColors.primary.withOpacity(0.1),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: AppColors.primary);
+            }
+            return const IconThemeData(color: AppColors.foregroundLight);
+          }),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600);
+            }
+            return const TextStyle(color: AppColors.foregroundLight);
+          }),
+        ),
       );
 
   static ThemeData get darkTheme => ThemeData(
@@ -125,6 +141,22 @@ class AppTheme {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: AppColors.backgroundDark,
+          indicatorColor: AppColors.primary.withOpacity(0.2),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: AppColors.primary);
+            }
+            return const IconThemeData(color: Colors.white70);
+          }),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600);
+            }
+            return const TextStyle(color: Colors.white70);
+          }),
         ),
       );
 }

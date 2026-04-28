@@ -19,22 +19,31 @@ class SplashScreen extends ConsumerWidget {
       });
     });
 
-    return const Scaffold(
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FlutterLogo(size: 120),
-            SizedBox(height: 24),
+            Icon(
+              Icons.pets,
+              size: 100,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(height: 24),
             Text(
               'Adopti',
-              style: TextStyle(
-                fontSize: 32,
+              style: textTheme.displaySmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: colorScheme.onBackground,
               ),
             ),
-            SizedBox(height: 16),
-            CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+            ),
           ],
         ),
       ),

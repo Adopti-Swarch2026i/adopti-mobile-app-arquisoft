@@ -11,6 +11,8 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = ref.watch(_loginLoadingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -24,48 +26,62 @@ class LoginScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const FlutterLogo(size: 100),
-            const SizedBox(height: 32),
-            const Text(
-              'Bienvenido a Adopti',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Icon(
+                Icons.pets,
+                size: 80,
+                color: colorScheme.primary,
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Encuentra y reporta mascotas perdidas',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 48),
-            ElevatedButton.icon(
-              onPressed: isLoading
-                  ? null
-                  : () => _signInWithGoogle(ref, context),
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.login),
-              label: Text(
-                isLoading ? 'Iniciando sesión...' : 'Iniciar sesión con Google',
+              const SizedBox(height: 24),
+              Text(
+                'Bienvenido a Adopti',
+                textAlign: TextAlign.center,
+                style: textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onBackground,
+                ),
               ),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+              const SizedBox(height: 8),
+              Text(
+                'Inicia sesión para reportar y buscar mascotas',
+                textAlign: TextAlign.center,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onBackground.withOpacity(0.6),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 48),
+              OutlinedButton.icon(
+                onPressed: isLoading
+                    ? null
+                    : () => _signInWithGoogle(ref, context),
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.login),
+                label: Text(
+                  isLoading ? 'Iniciando sesión...' : 'Continuar con Google',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: BorderSide(color: colorScheme.outline, width: 1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // rounded.md
+                  ),
+                  foregroundColor: colorScheme.onBackground,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

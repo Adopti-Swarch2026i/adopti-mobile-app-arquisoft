@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../widgets/chat/conversation_tile.dart';
-import '../../widgets/common/loading_indicator.dart';
 import '../../widgets/common/error_widget.dart';
+import '../../widgets/common/shimmer_loading.dart';
 
 class ConversationListScreen extends ConsumerWidget {
   const ConversationListScreen({super.key});
@@ -20,11 +20,12 @@ class ConversationListScreen extends ConsumerWidget {
       body: userAsync.when(
         data: (user) {
           if (user == null) {
-            return const Center(child: Text('Inicia sesión para ver tus conversaciones'));
+            return const Center(
+                child: Text('Inicia sesión para ver tus conversaciones'));
           }
           return _ConversationList(userId: user.id);
         },
-        loading: () => const Center(child: LoadingIndicator()),
+        loading: () => const ConversationListShimmer(),
         error: (error, stack) => AppErrorWidget(
           message: error.toString(),
           onRetry: () => ref.invalidate(currentUserProvider),
@@ -60,19 +61,22 @@ class _ConversationList extends ConsumerWidget {
             ),
           );
         }
-        return ListView.builder(
-          itemCount: conversations.length,
-          itemBuilder: (context, index) {
-            final conversation = conversations[index];
-            return ConversationTile(
-              conversation: conversation,
-              currentUserId: userId,
-              onTap: () => context.push('/chat/${conversation.id}'),
-            );
-          },
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(conversationsProvider(userId)),
+          child: ListView.builder(
+            itemCount: conversations.length,
+            itemBuilder: (context, index) {
+              final conversation = conversations[index];
+              return ConversationTile(
+                conversation: conversation,
+                currentUserId: userId,
+                onTap: () => context.push('/chat/${conversation.id}'),
+              );
+            },
+          ),
         );
       },
-      loading: () => const Center(child: LoadingIndicator()),
+      loading: () => const ConversationListShimmer(),
       error: (error, stack) => AppErrorWidget(
         message: error.toString(),
         onRetry: () => ref.invalidate(conversationsProvider(userId)),

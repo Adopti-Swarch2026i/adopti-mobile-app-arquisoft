@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import '../../../core/errors/exceptions.dart';
@@ -10,11 +12,15 @@ class MediaApiDataSource {
 
   Future<MediaUploadResultModel> uploadImage(dynamic imageFile) async {
     try {
+      final file = imageFile as File;
       final formData = FormData.fromMap({
-        'file': imageFile,
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split('/').last,
+        ),
       });
       final response = await _dio.post<Map<String, dynamic>>(
-        '/media/upload',
+        '/upload',
         data: formData,
       );
       return MediaUploadResultModel.fromJson(response.data!);
@@ -26,10 +32,10 @@ class MediaApiDataSource {
   Future<MediaUploadResultModel> getCachedImage(String hash) async {
     try {
       // Verify the cached image exists via HEAD request
-      await _dio.head<Map<String, dynamic>>('/media/$hash');
+      await _dio.head<Map<String, dynamic>>('/$hash');
       return MediaUploadResultModel(
-        url: '${_dio.options.baseUrl}/media/$hash',
-        thumbnailUrl: '${_dio.options.baseUrl}/media/$hash/thumbnail',
+        url: '${_dio.options.baseUrl}/$hash',
+        thumbnailUrl: '${_dio.options.baseUrl}/$hash/thumbnail',
         hash: hash,
       );
     } on DioException catch (e) {

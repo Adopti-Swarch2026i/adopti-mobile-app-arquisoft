@@ -1,3 +1,5 @@
+import '../../core/errors/exceptions.dart';
+import '../../core/errors/failures.dart';
 import '../../domain/entities/conversation.dart';
 import '../../domain/entities/message.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -18,20 +20,38 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<List<Conversation>> getConversations(String userId) async {
-    final models = await _graphqlDataSource.getConversations(userId);
-    return models.map((m) => m.toEntity()).toList();
+    try {
+      final models = await _graphqlDataSource.getConversations(userId);
+      return models.map((m) => m.toEntity()).toList();
+    } on ServerException catch (e) {
+      throw ServerFailure(e.message);
+    } on NetworkException catch (e) {
+      throw NetworkFailure(e.message);
+    }
   }
 
   @override
   Future<List<Message>> getMessages(String conversationId) async {
-    final models = await _graphqlDataSource.getMessages(conversationId);
-    return models.map((m) => m.toEntity()).toList();
+    try {
+      final models = await _graphqlDataSource.getMessages(conversationId);
+      return models.map((m) => m.toEntity()).toList();
+    } on ServerException catch (e) {
+      throw ServerFailure(e.message);
+    } on NetworkException catch (e) {
+      throw NetworkFailure(e.message);
+    }
   }
 
   @override
   Future<Conversation> createConversation(List<String> participantIds) async {
-    final model = await _graphqlDataSource.createConversation(participantIds);
-    return model.toEntity();
+    try {
+      final model = await _graphqlDataSource.createConversation(participantIds);
+      return model.toEntity();
+    } on ServerException catch (e) {
+      throw ServerFailure(e.message);
+    } on NetworkException catch (e) {
+      throw NetworkFailure(e.message);
+    }
   }
 
   @override

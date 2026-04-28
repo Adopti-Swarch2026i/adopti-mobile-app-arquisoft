@@ -63,9 +63,24 @@ final petRepositoryProvider = Provider<PetRepository>(
   ),
 );
 
+// Media Dio (usa baseUrl diferente: /api/media)
+final mediaDioProvider = Provider<Dio>((ref) {
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: EnvConfig.mediaApiUrl,
+      connectTimeout: ApiConstants.connectTimeout,
+      receiveTimeout: ApiConstants.receiveTimeout,
+    ),
+  );
+  dio.interceptors.add(
+    AuthInterceptor(ref.watch(firebaseAuthDataSourceProvider)),
+  );
+  return dio;
+});
+
 // Media
 final mediaApiProvider = Provider(
-  (ref) => MediaApiDataSource(ref.watch(dioProvider)),
+  (ref) => MediaApiDataSource(ref.watch(mediaDioProvider)),
 );
 
 final mediaRepositoryProvider = Provider<MediaRepository>(

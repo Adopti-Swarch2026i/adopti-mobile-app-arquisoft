@@ -210,22 +210,17 @@ class _PetDetailBody extends StatelessWidget {
     );
   }
 
-  String _speciesLabel(String species) {
+  String _speciesLabel(PetSpecies species) {
     switch (species) {
-      case 'dog': return 'Perro';
-      case 'cat': return 'Gato';
-      case 'bird': return 'Ave';
+      case PetSpecies.dog: return 'Perro';
+      case PetSpecies.cat: return 'Gato';
+      case PetSpecies.bird: return 'Ave';
       default: return 'Otro';
     }
   }
 
-  String _formatDate(String dateStr) {
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.day}/${date.month}/${date.year}';
-    } catch (_) {
-      return dateStr;
-    }
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 }
 

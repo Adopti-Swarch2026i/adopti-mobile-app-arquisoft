@@ -10,6 +10,7 @@ import '../screens/pets/pet_create_screen.dart';
 import '../screens/pets/pet_detail_screen.dart';
 import '../screens/pets/pet_filter_screen.dart';
 import '../screens/pets/pet_list_screen.dart';
+import '../screens/profile/about_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/splash_screen.dart';
 
@@ -62,6 +63,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/about',
+        builder: (context, state) => const AboutScreen(),
       ),
     ],
   );

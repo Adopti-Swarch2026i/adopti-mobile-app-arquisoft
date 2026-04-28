@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:adopti_mobile/core/errors/exceptions.dart';
+import 'package:adopti_mobile/core/errors/failures.dart';
 import 'package:adopti_mobile/data/datasources/remote/matching_api_datasource.dart';
 import 'package:adopti_mobile/data/datasources/remote/pets_api_datasource.dart';
 import 'package:adopti_mobile/data/models/paginated_reports_model.dart';
+import 'package:adopti_mobile/data/models/pet_model.dart';
 import 'package:adopti_mobile/data/models/report_response_model.dart';
 import 'package:adopti_mobile/data/repositories/pet_repository_impl.dart';
 import 'package:adopti_mobile/domain/entities/pet.dart';
@@ -43,7 +45,7 @@ void main() {
         ServerException('network error'),
       );
 
-      expect(() => repository.getStats(), throwsA(isA<Exception>()));
+      expect(() => repository.getStats(), throwsA(isA<Failure>()));
     });
   });
 

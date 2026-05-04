@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'presentation/routing/app_router.dart';
+import 'presentation/providers/fcm_initializer.dart';
 import 'core/theme/app_theme.dart';
 
 Future<void> main() async {
@@ -13,7 +14,9 @@ Future<void> main() async {
 
   runApp(
     const ProviderScope(
-      child: AdoptiApp(),
+      child: FcmInitializer(
+        child: AdoptiApp(),
+      ),
     ),
   );
 }

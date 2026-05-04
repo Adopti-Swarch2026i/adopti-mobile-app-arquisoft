@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/animations/app_animations.dart';
 import '../../../domain/entities/message.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
@@ -24,6 +25,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _isSending = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Asegurar que los mensajes históricos se carguen frescos al entrar al chat
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(messagesProvider(widget.conversationId));
+    });
+  }
+
+  @override
   void dispose() {
     _messageCtrl.dispose();
     _scrollCtrl.dispose();
@@ -35,7 +45,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       _scrollCtrl.animateTo(
         _scrollCtrl.position.maxScrollExtent,
         duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+        curve: AppEasings.easeOut,
       );
     }
   }
@@ -75,11 +85,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: messagesAsync.when(
               data: (historicalMessages) {
                 return streamAsync.when(
-                  data: (liveMessage) {
-                    // Combine historical + live messages
+                  data: (liveMessages) {
                     final allMessages = [...historicalMessages];
-                    if (!allMessages.any((m) => m.id == liveMessage.id)) {
-                      allMessages.add(liveMessage);
+                    for (final msg in liveMessages) {
+                      if (!allMessages.any((m) => m.id == msg.id)) {
+                        allMessages.add(msg);
+                      }
                     }
                     allMessages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
@@ -135,15 +146,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: _isSending ? null : _sendMessage,
-                    icon: _isSending
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.send),
+                  PressableScale(
+                    onTap: _isSending ? null : _sendMessage,
+                    child: IconButton(
+                      onPressed: _isSending ? null : _sendMessage,
+                      icon: _isSending
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.send),
+                    ),
                   ),
                 ],
               ),
@@ -179,10 +193,15 @@ class _MessageList extends StatelessWidget {
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final message = messages[index];
-        return MessageBubble(
-          content: message.content,
-          isMe: message.senderId == currentUserId,
-          timestamp: message.timestamp,
+        final isMe = message.senderId == currentUserId;
+        return FadeScaleEntrance(
+          delay: AppDurations.staggerItem(index.clamp(0, 10)),
+          duration: AppDurations.dropdown,
+          child: MessageBubble(
+            content: message.content,
+            isMe: isMe,
+            timestamp: message.timestamp,
+          ),
         );
       },
     );

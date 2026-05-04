@@ -22,6 +22,8 @@ class MessageModel {
       parsed = DateTime.fromMillisecondsSinceEpoch(rawTimestamp);
     } else if (rawTimestamp is double) {
       parsed = DateTime.fromMillisecondsSinceEpoch((rawTimestamp * 1000).toInt());
+    } else if (rawTimestamp is String) {
+      parsed = DateTime.tryParse(rawTimestamp) ?? DateTime.now();
     } else {
       parsed = DateTime.now();
     }

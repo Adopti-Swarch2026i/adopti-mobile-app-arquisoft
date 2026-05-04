@@ -24,6 +24,8 @@ class ConversationModel {
         return DateTime.fromMillisecondsSinceEpoch(value);
       } else if (value is double) {
         return DateTime.fromMillisecondsSinceEpoch((value * 1000).toInt());
+      } else if (value is String) {
+        return DateTime.tryParse(value) ?? DateTime.now();
       }
       return DateTime.now();
     }

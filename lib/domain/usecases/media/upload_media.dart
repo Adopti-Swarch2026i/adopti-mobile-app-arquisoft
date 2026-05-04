@@ -5,6 +5,6 @@ class UploadMedia {
 
   const UploadMedia(this._repository);
 
-  Future<MediaUploadResult> call(dynamic imageFile) =>
-      _repository.uploadImage(imageFile);
+  Future<MediaUploadResult> call(dynamic imageFile, {int? petId}) =>
+      _repository.uploadImage(imageFile, petId: petId);
 }

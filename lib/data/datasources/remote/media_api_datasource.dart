@@ -10,7 +10,7 @@ class MediaApiDataSource {
 
   MediaApiDataSource(this._dio);
 
-  Future<MediaUploadResultModel> uploadImage(dynamic imageFile) async {
+  Future<MediaUploadResultModel> uploadImage(dynamic imageFile, {int? petId}) async {
     try {
       final file = imageFile as File;
       final formData = FormData.fromMap({
@@ -18,6 +18,7 @@ class MediaApiDataSource {
           file.path,
           filename: file.path.split('/').last,
         ),
+        if (petId != null) 'petId': petId.toString(),
       });
       final response = await _dio.post<Map<String, dynamic>>(
         '/upload',

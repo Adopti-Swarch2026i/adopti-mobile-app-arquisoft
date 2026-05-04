@@ -9,9 +9,9 @@ class MediaRepositoryImpl implements MediaRepository {
   MediaRepositoryImpl(this._dataSource);
 
   @override
-  Future<MediaUploadResult> uploadImage(dynamic imageFile) async {
+  Future<MediaUploadResult> uploadImage(dynamic imageFile, {int? petId}) async {
     try {
-      final result = await _dataSource.uploadImage(imageFile);
+      final result = await _dataSource.uploadImage(imageFile, petId: petId);
       return result.toEntity();
     } on ServerException catch (e) {
       throw ServerFailure(e.message);

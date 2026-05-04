@@ -15,11 +15,15 @@ class PaginatedNotificationsModel {
   });
 
   factory PaginatedNotificationsModel.fromJson(Map<String, dynamic> json) {
+    final data = (json['data'] as List<dynamic>? ?? []);
+    final limit = json['limit'] as int? ?? 20;
+    final offset = json['offset'] as int? ?? 0;
+
     return PaginatedNotificationsModel(
-      total: json['total'] as int,
-      page: json['page'] as int,
-      pageSize: json['page_size'] as int,
-      results: (json['results'] as List<dynamic>)
+      total: offset + data.length,
+      page: limit > 0 ? (offset ~/ limit) + 1 : 1,
+      pageSize: limit,
+      results: data
           .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
           .toList(),
     );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_colors.dart';
 
 class MessageBubble extends StatelessWidget {
   final String content;
@@ -35,7 +34,7 @@ class MessageBubble extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isMe ? colorScheme.primary.withOpacity(0.9) : colorScheme.secondary,
+                color: isMe ? colorScheme.primary.withValues(alpha: 0.9) : colorScheme.secondary,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(20),
                   topRight: const Radius.circular(20),
@@ -51,7 +50,7 @@ class MessageBubble extends StatelessWidget {
                       senderName!,
                       style: textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: colorScheme.onSecondary.withOpacity(0.8),
+                        color: colorScheme.onSecondary.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -70,8 +69,8 @@ class MessageBubble extends StatelessWidget {
                       style: textTheme.labelSmall?.copyWith(
                         fontSize: 10,
                         color: isMe
-                            ? colorScheme.onPrimary.withOpacity(0.7)
-                            : colorScheme.onSecondary.withOpacity(0.6),
+                            ? colorScheme.onPrimary.withValues(alpha: 0.7)
+                            : colorScheme.onSecondary.withValues(alpha: 0.6),
                       ),
                     ),
                   ),

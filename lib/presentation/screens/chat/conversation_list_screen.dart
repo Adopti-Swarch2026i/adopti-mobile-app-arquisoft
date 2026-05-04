@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../widgets/chat/conversation_tile.dart';
+import '../../widgets/common/app_empty_state.dart';
 import '../../widgets/common/error_widget.dart';
 import '../../widgets/common/shimmer_loading.dart';
 
@@ -20,8 +21,11 @@ class ConversationListScreen extends ConsumerWidget {
       body: userAsync.when(
         data: (user) {
           if (user == null) {
-            return const Center(
-                child: Text('Inicia sesión para ver tus conversaciones'));
+            return const AppEmptyState(
+              icon: Icons.chat_bubble_outline,
+              title: 'Inicia sesión',
+              subtitle: 'Conecta con personas que han reportado mascotas o encontrado la tuya.',
+            );
           }
           return _ConversationList(userId: user.id);
         },
@@ -47,18 +51,10 @@ class _ConversationList extends ConsumerWidget {
     return conversationsAsync.when(
       data: (conversations) {
         if (conversations.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  'Aún no tienes conversaciones',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
+          return const AppEmptyState(
+            icon: Icons.chat_bubble_outline,
+            title: 'Aún no tienes conversaciones',
+            subtitle: 'Cuando contactes a alguien sobre una mascota, aparecerá aquí.',
           );
         }
         return RefreshIndicator(

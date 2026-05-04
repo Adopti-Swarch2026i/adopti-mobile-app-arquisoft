@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/entities/conversation.dart';
-import '../../../core/theme/app_colors.dart';
 
 class ConversationTile extends StatelessWidget {
   final Conversation conversation;
@@ -46,7 +45,7 @@ class ConversationTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
-            color: hasUnread ? colorScheme.primary.withOpacity(0.05) : Colors.transparent,
+            color: hasUnread ? colorScheme.primary.withValues(alpha: 0.05) : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -72,7 +71,7 @@ class ConversationTile extends StatelessWidget {
                             _otherUserName,
                             style: textTheme.titleMedium?.copyWith(
                               fontWeight: hasUnread ? FontWeight.bold : FontWeight.w600,
-                              color: colorScheme.onBackground,
+                              color: colorScheme.onSurface,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -82,7 +81,7 @@ class ConversationTile extends StatelessWidget {
                           Text(
                             _formatDate(conversation.lastMessage!.timestamp),
                             style: textTheme.bodySmall?.copyWith(
-                              color: hasUnread ? colorScheme.primary : colorScheme.onBackground.withOpacity(0.5),
+                              color: hasUnread ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: 0.5),
                               fontWeight: hasUnread ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
@@ -95,7 +94,7 @@ class ConversationTile extends StatelessWidget {
                           child: Text(
                             _lastMessageText ?? 'Sin mensajes',
                             style: textTheme.bodyMedium?.copyWith(
-                              color: hasUnread ? colorScheme.onBackground : colorScheme.onBackground.withOpacity(0.6),
+                              color: hasUnread ? colorScheme.onSurface : colorScheme.onSurface.withValues(alpha: 0.6),
                               fontWeight: hasUnread ? FontWeight.w600 : FontWeight.normal,
                             ),
                             maxLines: 1,

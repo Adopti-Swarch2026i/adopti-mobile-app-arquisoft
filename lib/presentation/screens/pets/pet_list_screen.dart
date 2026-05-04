@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/pets_provider.dart';
-import '../../widgets/pets/pet_card.dart';
-import '../../widgets/pets/status_badge.dart';
+import '../../widgets/common/app_empty_state.dart';
 import '../../widgets/common/error_widget.dart';
 import '../../widgets/common/shimmer_loading.dart';
+import '../../widgets/pets/pet_card.dart';
 
 class PetListScreen extends ConsumerStatefulWidget {
   const PetListScreen({super.key});
@@ -55,10 +55,16 @@ class _PetListScreenState extends ConsumerState<PetListScreen> {
         data: (state) => RefreshIndicator(
           onRefresh: () => ref.read(petListNotifierProvider.notifier).refresh(),
           child: state.pets.isEmpty
-              ? const Center(child: Text('No hay mascotas reportadas'))
+              ? AppEmptyState(
+                  icon: Icons.pets,
+                  title: 'No hay mascotas reportadas',
+                  subtitle: 'Sé el primero en reportar una mascota perdida o encontrada en tu zona.',
+                  onAction: () => context.push('/pets/create'),
+                  actionLabel: 'Nuevo reporte',
+                )
               : ListView.builder(
                   controller: _scrollController,
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: state.pets.length + (state.isLoadingMore ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index >= state.pets.length) {
@@ -70,6 +76,7 @@ class _PetListScreenState extends ConsumerState<PetListScreen> {
                     final pet = state.pets[index];
                     return PetCard(
                       pet: pet,
+                      index: index,
                       onTap: () => context.push('/pets/${pet.id}'),
                     );
                   },

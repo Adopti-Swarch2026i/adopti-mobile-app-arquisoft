@@ -58,7 +58,7 @@ class _PetCreateScreenState extends ConsumerState<PetCreateScreen> {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+        borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -213,6 +213,80 @@ class _PetCreateScreenState extends ConsumerState<PetCreateScreen> {
     );
   }
 
+  Future<void> _showSpeciesPicker() async {
+    final colorScheme = Theme.of(context).colorScheme;
+    final result = await showModalBottomSheet<PetSpecies>(
+      context: context,
+      backgroundColor: colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Selecciona la especie',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            ...PetSpecies.values.map((s) {
+              final label = switch (s) {
+                PetSpecies.dog => 'Perro',
+                PetSpecies.cat => 'Gato',
+                PetSpecies.bird => 'Ave',
+                PetSpecies.other => 'Otro',
+              };
+              final isSelected = _species == s;
+              return ListTile(
+                leading: Icon(
+                  switch (s) {
+                    PetSpecies.dog => Icons.pets,
+                    PetSpecies.cat => Icons.pets,
+                    PetSpecies.bird => Icons.flutter_dash,
+                    PetSpecies.other => Icons.question_mark,
+                  },
+                  color: isSelected ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+                title: Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                  ),
+                ),
+                trailing: isSelected
+                    ? Icon(Icons.check_circle, color: colorScheme.primary)
+                    : null,
+                onTap: () => Navigator.pop(context, s),
+              );
+            }),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+    if (result != null) {
+      setState(() => _species = result);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -226,7 +300,7 @@ class _PetCreateScreenState extends ConsumerState<PetCreateScreen> {
           children: [
             _buildStatusSelector(),
             const SizedBox(height: 32),
-            
+
             const _SectionTitle('La mascota'),
             const SizedBox(height: 8),
             TextFormField(
@@ -235,21 +309,24 @@ class _PetCreateScreenState extends ConsumerState<PetCreateScreen> {
               validator: (v) => v?.trim().isEmpty == true ? 'Requerido' : null,
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<PetSpecies>(
-              decoration: _inputDecoration('Especie *'),
-              value: _species,
-              items: PetSpecies.values.map((s) {
-                return DropdownMenuItem(
-                  value: s,
-                  child: Text(switch (s) {
+            InkWell(
+              onTap: () => _showSpeciesPicker(),
+              borderRadius: BorderRadius.circular(12),
+              child: InputDecorator(
+                decoration: _inputDecoration('Especie *'),
+                child: Text(
+                  switch (_species) {
                     PetSpecies.dog => 'Perro',
                     PetSpecies.cat => 'Gato',
                     PetSpecies.bird => 'Ave',
                     PetSpecies.other => 'Otro',
-                  }),
-                );
-              }).toList(),
-              onChanged: (v) => setState(() => _species = v!),
+                  },
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -274,7 +351,7 @@ class _PetCreateScreenState extends ConsumerState<PetCreateScreen> {
               controller: _ageCtrl,
               decoration: _inputDecoration('Edad aprox. (opcional)'),
             ),
-            
+
             const SizedBox(height: 32),
             const _SectionTitle('Ubicación'),
             const SizedBox(height: 8),
@@ -289,7 +366,7 @@ class _PetCreateScreenState extends ConsumerState<PetCreateScreen> {
               decoration: _inputDecoration('Ciudad *'),
               validator: (v) => v?.trim().isEmpty == true ? 'Requerido' : null,
             ),
-            
+
             const SizedBox(height: 32),
             const _SectionTitle('Detalles'),
             const SizedBox(height: 8),
@@ -305,7 +382,7 @@ class _PetCreateScreenState extends ConsumerState<PetCreateScreen> {
               decoration: _inputDecoration('Teléfono de contacto (opcional)'),
               keyboardType: TextInputType.phone,
             ),
-            
+
             const SizedBox(height: 32),
             const _SectionTitle('Fotos'),
             const SizedBox(height: 8),
@@ -342,7 +419,7 @@ class _PetCreateScreenState extends ConsumerState<PetCreateScreen> {
                       borderRadius: BorderRadius.circular(12),
                       color: Theme.of(context).colorScheme.surface,
                     ),
-                    child: Icon(Icons.add_photo_alternate, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                    child: Icon(Icons.add_photo_alternate, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                   ),
                 ),
               ],
@@ -363,7 +440,7 @@ class _PetCreateScreenState extends ConsumerState<PetCreateScreen> {
                     : 'Subir ${_selectedImages.length} imagen(es)'),
               ),
             ],
-            
+
             const SizedBox(height: 48),
             SizedBox(
               width: double.infinity,
@@ -404,7 +481,7 @@ class _SectionTitle extends StatelessWidget {
       text,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onBackground,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
     );
   }
@@ -429,36 +506,57 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Theme.of(context).colorScheme.surface,
+          color: isSelected
+              ? color.withValues(alpha: isDark ? 0.2 : 0.1)
+              : colorScheme.surfaceContainerHighest.withValues(alpha: isDark ? 0.5 : 0.3),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? color : Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
-            width: isSelected ? 2 : 1,
+            color: isSelected
+                ? color
+                : colorScheme.outlineVariant.withValues(alpha: isDark ? 0.5 : 0.4),
+            width: isSelected ? 2.5 : 1.5,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: isSelected ? color : Theme.of(context).colorScheme.onSurface.withOpacity(0.5), size: 28),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? color.withValues(alpha: 0.15)
+                    : colorScheme.onSurface.withValues(alpha: isDark ? 0.08 : 0.06),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? color : colorScheme.onSurface.withValues(alpha: isDark ? 0.85 : 0.7),
+                size: 24,
+              ),
+            ),
             const SizedBox(height: 12),
             Text(
               title,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: isSelected ? color : Theme.of(context).colorScheme.onSurface,
+                color: isSelected ? color : colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: colorScheme.onSurface.withValues(alpha: isDark ? 0.7 : 0.6),
+                height: 1.3,
               ),
             ),
           ],

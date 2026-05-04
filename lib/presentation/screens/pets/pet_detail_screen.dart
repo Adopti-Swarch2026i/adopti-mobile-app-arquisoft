@@ -1,8 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/animations/app_animations.dart';
 import '../../../domain/entities/pet.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/dependency_injection.dart';
 import '../../providers/pets_provider.dart';
 import '../../widgets/pets/status_badge.dart';
 import '../../widgets/common/loading_indicator.dart';
@@ -42,13 +46,13 @@ class PetDetailScreen extends ConsumerWidget {
   }
 }
 
-class _PetDetailBody extends StatelessWidget {
+class _PetDetailBody extends ConsumerWidget {
   final Pet pet;
 
   const _PetDetailBody({required this.pet});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final size = MediaQuery.of(context).size;
@@ -57,13 +61,16 @@ class _PetDetailBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Image Gallery at Top
+          // Image Gallery at Top with Hero
           SizedBox(
             height: size.height * 0.45,
-            child: _ImageGallery(imageUrls: pet.imageUrls),
+            child: Hero(
+              tag: 'pet-image-${pet.id}',
+              child: _ImageGallery(imageUrls: pet.imageUrls),
+            ),
           ),
-          
-          // Overlapping content card
+
+          // Overlapping content card with staggered entrance
           Transform.translate(
             offset: const Offset(0, -32),
             child: Container(
@@ -80,122 +87,145 @@ class _PetDetailBody extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Header Row: Title & Status
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                pet.name,
-                                style: textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.onSurface,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                pet.breed.isNotEmpty
-                                    ? '${_speciesLabel(pet.species)} • ${pet.breed}'
-                                    : _speciesLabel(pet.species),
-                                style: textTheme.titleMedium?.copyWith(
-                                  color: colorScheme.onSurface.withOpacity(0.7),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        StatusBadge(status: pet.status),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    // Detail Grid
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.2)),
-                      ),
-                      child: Column(
+                    FadeScaleEntrance(
+                      delay: const Duration(milliseconds: 50),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (pet.color.isNotEmpty || pet.age.isNotEmpty) ...[
-                            Row(
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (pet.color.isNotEmpty)
-                                  Expanded(child: _StatCard(label: 'Color', value: pet.color)),
-                                if (pet.color.isNotEmpty && pet.age.isNotEmpty)
-                                  const SizedBox(width: 16),
-                                if (pet.age.isNotEmpty)
-                                  Expanded(child: _StatCard(label: 'Edad', value: pet.age)),
+                                Text(
+                                  pet.name,
+                                  style: textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  pet.breed.isNotEmpty
+                                      ? '${_speciesLabel(pet.species)} • ${pet.breed}'
+                                      : _speciesLabel(pet.species),
+                                  style: textTheme.titleMedium?.copyWith(
+                                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                  ),
+                                ),
                               ],
                             ),
-                            const Divider(height: 32),
-                          ],
-                          _InfoRow(icon: Icons.location_on, value: '${pet.location}, ${pet.city}'),
-                          const SizedBox(height: 12),
-                          _InfoRow(icon: Icons.calendar_today, value: _formatDate(pet.date)),
+                          ),
+                          StatusBadge(status: pet.status),
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Detail Grid
+                    FadeScaleEntrance(
+                      delay: const Duration(milliseconds: 120),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.2)),
+                        ),
+                        child: Column(
+                          children: [
+                            if (pet.color.isNotEmpty || pet.age.isNotEmpty) ...[
+                              Row(
+                                children: [
+                                  if (pet.color.isNotEmpty)
+                                    Expanded(child: _StatCard(label: 'Color', value: pet.color)),
+                                  if (pet.color.isNotEmpty && pet.age.isNotEmpty)
+                                    const SizedBox(width: 16),
+                                  if (pet.age.isNotEmpty)
+                                    Expanded(child: _StatCard(label: 'Edad', value: pet.age)),
+                                ],
+                              ),
+                              const Divider(height: 32),
+                            ],
+                            _InfoRow(icon: Icons.location_on, value: '${pet.location}, ${pet.city}'),
+                            const SizedBox(height: 12),
+                            _InfoRow(icon: Icons.calendar_today, value: _formatDate(pet.date)),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
 
                     // Description
                     if (pet.description.isNotEmpty) ...[
-                      Text(
-                        'Descripción',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
+                      FadeScaleEntrance(
+                        delay: const Duration(milliseconds: 190),
+                        child: Text(
+                          'Descripción',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        pet.description,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.8),
-                          height: 1.5,
+                      FadeScaleEntrance(
+                        delay: const Duration(milliseconds: 220),
+                        child: Text(
+                          pet.description,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.8),
+                            height: 1.5,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
                     ],
 
                     // Reporter Info
-                    Text(
-                      'Reportado por',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
+                    FadeScaleEntrance(
+                      delay: const Duration(milliseconds: 290),
+                      child: Text(
+                        'Reportado por',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    _InfoRow(icon: Icons.person, value: pet.reporterName),
+                    FadeScaleEntrance(
+                      delay: const Duration(milliseconds: 320),
+                      child: _InfoRow(icon: Icons.person, value: pet.reporterName),
+                    ),
                     if (pet.contactPhone != null && pet.contactPhone!.isNotEmpty) ...[
                       const SizedBox(height: 12),
-                      _InfoRow(icon: Icons.phone, value: pet.contactPhone!),
+                      FadeScaleEntrance(
+                        delay: const Duration(milliseconds: 350),
+                        child: _InfoRow(icon: Icons.phone, value: pet.contactPhone!),
+                      ),
                     ],
-                    
+
                     const SizedBox(height: 32),
 
-                    // Action Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Chat próximamente')),
-                          );
-                        },
-                        icon: const Icon(Icons.chat_bubble_outline),
-                        label: Text(
-                          pet.status == PetStatus.lost
-                              ? 'Contactar al dueño'
-                              : 'Contactar al reportante',
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                    // Action Button with press feedback
+                    FadeScaleEntrance(
+                      delay: const Duration(milliseconds: 400),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: PressableScale(
+                          onTap: () => _startChat(context, ref),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _startChat(context, ref),
+                            icon: const Icon(Icons.chat_bubble_outline),
+                            label: Text(
+                              pet.status == PetStatus.lost
+                                  ? 'Contactar al dueño'
+                                  : 'Contactar al reportante',
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -221,6 +251,43 @@ class _PetDetailBody extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Future<void> _startChat(BuildContext context, WidgetRef ref) async {
+    final currentUser = await ref.read(currentUserProvider.future);
+    if (currentUser == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Debes iniciar sesión para chatear')),
+        );
+      }
+      return;
+    }
+
+    if (currentUser.id == pet.reporterId) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No puedes chatear contigo mismo')),
+        );
+      }
+      return;
+    }
+
+    try {
+      final repo = ref.read(chatRepositoryProvider);
+      final conversation = await repo.createConversation(
+        [currentUser.id, pet.reporterId],
+      );
+      if (context.mounted) {
+        context.push('/chat/${conversation.id}');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error iniciando chat: $e')),
+        );
+      }
+    }
   }
 }
 
@@ -269,7 +336,7 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.onSurface.withOpacity(0.05),
+        color: colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -278,7 +345,7 @@ class _StatCard extends StatelessWidget {
           Text(
             label.toUpperCase(),
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.5),
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
               fontWeight: FontWeight.bold,
               letterSpacing: 1.1,
             ),
@@ -310,13 +377,13 @@ class _InfoRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 20, color: colorScheme.onSurface.withOpacity(0.5)),
+        Icon(icon, size: 20, color: colorScheme.onSurface.withValues(alpha: 0.5)),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.8),
+              color: colorScheme.onSurface.withValues(alpha: 0.8),
             ),
           ),
         ),

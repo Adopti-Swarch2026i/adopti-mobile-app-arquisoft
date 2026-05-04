@@ -96,7 +96,7 @@ class _PetFilterScreenState extends ConsumerState<PetFilterScreen> {
           TextField(
             controller: _searchCtrl,
             decoration: const InputDecoration(
-              labelText: 'Búsqueda',
+              labelText: 'Busqueda',
               prefixIcon: Icon(Icons.search),
               hintText: 'Nombre, raza...',
             ),
@@ -133,22 +133,106 @@ class _DropdownFilter<T> extends StatelessWidget {
     required this.onChanged,
   });
 
+  Future<void> _showPicker(BuildContext context) async {
+    final colorScheme = Theme.of(context).colorScheme;
+    final result = await showModalBottomSheet<T?>(
+      context: context,
+      backgroundColor: colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(
+                Icons.clear_all,
+                color: value == null
+                    ? colorScheme.primary
+                    : colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              title: Text(
+                'Todos',
+                style: TextStyle(
+                  fontWeight: value == null ? FontWeight.bold : FontWeight.normal,
+                  color: value == null ? colorScheme.primary : colorScheme.onSurface,
+                ),
+              ),
+              trailing: value == null
+                  ? Icon(Icons.check_circle, color: colorScheme.primary)
+                  : null,
+              onTap: () => Navigator.pop(context, null),
+            ),
+            ...items.map((item) {
+              final isSelected = value == item;
+              return ListTile(
+                title: Text(
+                  displayName(item),
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                  ),
+                ),
+                trailing: isSelected
+                    ? Icon(Icons.check_circle, color: colorScheme.primary)
+                    : null,
+                onTap: () => Navigator.pop(context, item),
+              );
+            }),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+    onChanged(result);
+  }
+
+  String get _displayValue {
+    if (value == null) return 'Todos';
+    return displayName(value as T);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<T>(
-      decoration: InputDecoration(labelText: label),
-      value: value,
-      items: [
-        const DropdownMenuItem(
-          value: null,
-          child: Text('Todos'),
+    return InkWell(
+      onTap: () => _showPicker(context),
+      borderRadius: BorderRadius.circular(12),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          suffixIcon: const Icon(Icons.arrow_drop_down),
         ),
-        ...items.map((item) => DropdownMenuItem(
-              value: item,
-              child: Text(displayName(item)),
-            )),
-      ],
-      onChanged: onChanged,
+        child: Text(
+          _displayValue,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 16,
+          ),
+        ),
+      ),
     );
   }
 }

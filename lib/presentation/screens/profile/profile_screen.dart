@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../domain/usecases/auth/sign_out.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/animations/app_animations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/dependency_injection.dart';
 import '../../providers/pets_provider.dart';
@@ -35,98 +36,22 @@ class ProfileScreen extends ConsumerWidget {
           if (user == null) {
             return const Center(child: Text('No has iniciado sesión'));
           }
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Hero / Banner Section
-                Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    Container(
-                      height: 240,
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [AppColors.primary, AppColors.accent],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      // Paw pattern or decoration can go here
-                    ),
-                    Positioned(
-                      bottom: -50,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            width: 6,
-                          ),
-                        ),
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
-                          backgroundImage: user.photoURL != null
-                              ? NetworkImage(user.photoURL!)
-                              : null,
-                          child: user.photoURL == null
-                              ? Text(
-                                  user.displayName.isNotEmpty
-                                      ? user.displayName[0].toUpperCase()
-                                      : 'U',
-                                  style: TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onSecondary,
-                                  ),
-                                )
-                              : null,
-                        ),
-                      ),
-                    ),
-                  ],
+          return CustomScrollView(
+            slivers: [
+              // Hero Banner with Avatar
+              SliverToBoxAdapter(
+                child: _ProfileHeader(
+                  displayName: user.displayName,
+                  email: user.email,
+                  phone: user.phone,
+                  photoURL: user.photoURL,
                 ),
-                const SizedBox(height: 60),
+              ),
 
-                // User Info
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    children: [
-                      Text(
-                        user.displayName,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onBackground,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.email,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
-                        ),
-                      ),
-                      if (user.phone != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          user.phone!,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Stats Section
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+              // Stats Section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
                   child: statsAsync.when(
                     data: (stats) => _StatsCard(stats: stats),
                     loading: () => const ShimmerLoading(
@@ -135,87 +60,109 @@ class ProfileScreen extends ConsumerWidget {
                     error: (_, __) => const SizedBox.shrink(),
                   ),
                 ),
-                const SizedBox(height: 32),
+              ),
 
-                // Settings List
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
+              // Settings Title
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+                  child: Text(
+                    'Configuración',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      letterSpacing: 0.5,
                     ),
-                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                ),
+              ),
+
+              // Settings Items
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
                     child: Column(
                       children: [
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(Icons.notifications_outlined, color: AppColors.primary),
-                          ),
-                          title: const Text('Notificaciones'),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Notificaciones próximamente')),
-                            );
-                          },
+                        _MenuItem(
+                          icon: Icons.notifications_outlined,
+                          iconBgColor: AppColors.primary.withValues(alpha: 0.1),
+                          iconColor: AppColors.primary,
+                          label: 'Notificaciones',
+                          onTap: () => context.push('/notifications'),
                         ),
-                        const Divider(height: 1, indent: 64),
-                        ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.accent.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(Icons.info_outline, color: AppColors.accent),
-                          ),
-                          title: const Text('Acerca de'),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                        const Divider(height: 1, indent: 64, endIndent: 16),
+                        _MenuItem(
+                          icon: Icons.info_outline,
+                          iconBgColor: AppColors.accent.withValues(alpha: 0.1),
+                          iconColor: AppColors.accent,
+                          label: 'Acerca de',
                           onTap: () => context.push('/about'),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+              ),
 
-                // Logout
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: AppColors.destructive.withOpacity(0.3)),
-                    ),
-                    color: Theme.of(context).colorScheme.surface,
-                    child: ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.destructive.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.logout, color: AppColors.destructive),
+              // Logout
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
+                  child: PressableScale(
+                    onTap: () => _signOut(ref, context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: AppColors.destructive.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      title: const Text(
-                        'Cerrar sesión',
-                        style: TextStyle(color: AppColors.destructive, fontWeight: FontWeight.bold),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.destructive.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.logout,
+                              color: AppColors.destructive,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Text(
+                            'Cerrar sesión',
+                            style: TextStyle(
+                              color: AppColors.destructive,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const Spacer(),
+                          Icon(
+                            Icons.chevron_right,
+                            color: AppColors.destructive.withValues(alpha: 0.4),
+                          ),
+                        ],
                       ),
-                      onTap: () => _signOut(ref, context),
                     ),
                   ),
                 ),
-                const SizedBox(height: 48),
-              ],
-            ),
+              ),
+            ],
           );
         },
         loading: () => const Center(child: LoadingIndicator()),
@@ -245,6 +192,149 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
+class _ProfileHeader extends StatelessWidget {
+  final String displayName;
+  final String email;
+  final String? phone;
+  final String? photoURL;
+
+  const _ProfileHeader({
+    required this.displayName,
+    required this.email,
+    this.phone,
+    this.photoURL,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      children: [
+        // Gradient banner with curved bottom
+        Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.bottomCenter,
+          children: [
+            Container(
+              height: 220,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF2D6A4F), Color(0xFF358D64), Color(0xFF4A9B70)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
+            // Curved bottom edge
+            Positioned(
+              bottom: -1,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(32),
+                    topRight: Radius.circular(32),
+                  ),
+                ),
+              ),
+            ),
+            // Avatar with gradient ring
+            Positioned(
+              bottom: 10,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.accent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 52,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  child: CircleAvatar(
+                    radius: 48,
+                    backgroundColor: photoURL == null
+                        ? AppColors.primary.withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    backgroundImage: photoURL != null
+                        ? NetworkImage(photoURL!)
+                        : null,
+                    child: photoURL == null
+                        ? Text(
+                            displayName.isNotEmpty
+                                ? displayName[0].toUpperCase()
+                                : 'U',
+                            style: const TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        // Name & Email
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              Text(
+                displayName,
+                style: textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                  letterSpacing: -0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                email,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.55),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (phone != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  phone!,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.55),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _StatsCard extends StatelessWidget {
   final Map<String, int> stats;
 
@@ -253,44 +343,31 @@ class _StatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = (stats['lost'] ?? 0) + (stats['found'] ?? 0) + (stats['reunited'] ?? 0);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _StatItem(
-            label: 'Reportes',
-            value: total,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          _StatItem(
-            label: 'Perdidos',
-            value: stats['lost'] ?? 0,
-            color: AppColors.lost,
-          ),
-          _StatItem(
-            label: 'Encontrados',
-            value: stats['found'] ?? 0,
-            color: AppColors.found,
-          ),
-          _StatItem(
-            label: 'Reunidos',
-            value: stats['reunited'] ?? 0,
-            color: AppColors.reunited,
-          ),
+          _StatItem(label: 'Reportes', value: total, color: colorScheme.onSurface),
+          _StatDivider(),
+          _StatItem(label: 'Perdidos', value: stats['lost'] ?? 0, color: AppColors.lost),
+          _StatDivider(),
+          _StatItem(label: 'Encontrados', value: stats['found'] ?? 0, color: AppColors.found),
+          _StatDivider(),
+          _StatItem(label: 'Reunidos', value: stats['reunited'] ?? 0, color: AppColors.reunited),
         ],
       ),
     );
@@ -315,20 +392,83 @@ class _StatItem extends StatelessWidget {
         Text(
           '$value',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+            fontWeight: FontWeight.bold,
+            color: color,
+            fontSize: 24,
+          ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            letterSpacing: 0.3,
           ),
         ),
       ],
+    );
+  }
+}
+
+class _StatDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 36,
+      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+    );
+  }
+}
+
+class _MenuItem extends StatelessWidget {
+  final IconData icon;
+  final Color iconBgColor;
+  final Color iconColor;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MenuItem({
+    required this.icon,
+    required this.iconBgColor,
+    required this.iconColor,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: iconBgColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor, size: 22),
+          ),
+          title: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          trailing: Icon(
+            Icons.chevron_right,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
+          onTap: onTap,
+        ),
+      ),
     );
   }
 }
@@ -339,11 +479,10 @@ class _StatsCardShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -356,12 +495,12 @@ class _StatsCardShimmer extends StatelessWidget {
                 height: 28,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
               const SizedBox(height: 8),
               Container(
-                width: 60,
+                width: 56,
                 height: 12,
                 decoration: BoxDecoration(
                   color: Colors.white,

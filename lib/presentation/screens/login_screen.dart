@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/animations/app_animations.dart';
+import '../../core/theme/app_colors.dart';
 import '../../domain/usecases/auth/sign_in_with_google.dart';
 import '../providers/dependency_injection.dart';
 
@@ -11,76 +13,169 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = ref.watch(_loginLoadingProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Adopti'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              // TODO: navigate to AboutScreen
-            },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF2D6A4F), Color(0xFF358D64)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Icon(
-                Icons.pets,
-                size: 80,
-                color: colorScheme.primary,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Bienvenido a Adopti',
-                textAlign: TextAlign.center,
-                style: textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onBackground,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Inicia sesión para reportar y buscar mascotas',
-                textAlign: TextAlign.center,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onBackground.withOpacity(0.6),
-                ),
-              ),
-              const SizedBox(height: 48),
-              OutlinedButton.icon(
-                onPressed: isLoading
-                    ? null
-                    : () => _signInWithGoogle(ref, context),
-                icon: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.login),
-                label: Text(
-                  isLoading ? 'Iniciando sesión...' : 'Continuar con Google',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: BorderSide(color: colorScheme.outline, width: 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // rounded.md
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 40),
+                  FadeScaleEntrance(
+                    delay: const Duration(milliseconds: 0),
+                    duration: AppDurations.entrance,
+                    child: Container(
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.pets,
+                        size: 64,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                  foregroundColor: colorScheme.onBackground,
-                ),
+                  const SizedBox(height: 32),
+                  FadeScaleEntrance(
+                    delay: const Duration(milliseconds: 100),
+                    duration: AppDurations.entrance,
+                    child: const Text(
+                      'Adopti',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 42,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  FadeScaleEntrance(
+                    delay: const Duration(milliseconds: 180),
+                    duration: AppDurations.entrance,
+                    child: const Text(
+                      'Encuentra y reporta\nmascotas perdidas',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white70,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 60),
+                  FadeScaleEntrance(
+                    delay: const Duration(milliseconds: 280),
+                    duration: AppDurations.entrance,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 30,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Bienvenido',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF362417),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Inicia sesión para continuar',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          PressableScale(
+                            onTap: isLoading
+                                ? null
+                                : () => _signInWithGoogle(ref, context),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 54,
+                              child: ElevatedButton.icon(
+                                onPressed: isLoading
+                                    ? null
+                                    : () => _signInWithGoogle(ref, context),
+                                icon: isLoading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(Icons.login, size: 20),
+                                label: Text(
+                                  isLoading
+                                      ? 'Iniciando sesión...'
+                                      : 'Continuar con Google',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  FadeScaleEntrance(
+                    delay: const Duration(milliseconds: 380),
+                    duration: AppDurations.entrance,
+                    child: const Text(
+                      'Al continuar, aceptas nuestros términos\ny condiciones de uso',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white54,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

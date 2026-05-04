@@ -31,6 +31,11 @@ build/
 /ios/Flutter/Flutter.framework
 /ios/Flutter/Flutter.podspec
 
+# Desktop platforms (no aplican para app móvil)
+/linux/
+/macos/
+/windows/
+
 # Env
 .env
 *.env

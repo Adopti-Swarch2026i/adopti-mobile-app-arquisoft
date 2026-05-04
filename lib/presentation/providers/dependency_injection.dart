@@ -12,6 +12,7 @@ import '../../data/datasources/remote/matching_api_datasource.dart';
 import '../../data/datasources/remote/media_api_datasource.dart';
 import '../../data/datasources/remote/notifications_api_datasource.dart';
 import '../../data/datasources/remote/pets_api_datasource.dart';
+import '../../core/services/fcm_service.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../data/repositories/media_repository_impl.dart';
@@ -22,6 +23,7 @@ import '../../domain/repositories/chat_repository.dart';
 import '../../domain/repositories/media_repository.dart';
 import '../../domain/repositories/notification_repository.dart';
 import '../../domain/repositories/pet_repository.dart';
+import '../../presentation/routing/app_router.dart';
 
 // Auth
 final firebaseAuthDataSourceProvider = Provider(
@@ -47,13 +49,28 @@ final dioProvider = Provider<Dio>((ref) {
   return dio;
 });
 
+// Matching Dio (baseUrl diferente: /api para que /search resuelva /api/search)
+final matchingDioProvider = Provider<Dio>((ref) {
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: EnvConfig.matchingApiUrl,
+      connectTimeout: ApiConstants.connectTimeout,
+      receiveTimeout: ApiConstants.receiveTimeout,
+    ),
+  );
+  dio.interceptors.add(
+    AuthInterceptor(ref.watch(firebaseAuthDataSourceProvider)),
+  );
+  return dio;
+});
+
 // Pets
 final petsApiProvider = Provider(
   (ref) => PetsApiDataSource(ref.watch(dioProvider)),
 );
 
 final matchingApiProvider = Provider(
-  (ref) => MatchingApiDataSource(ref.watch(dioProvider)),
+  (ref) => MatchingApiDataSource(ref.watch(matchingDioProvider)),
 );
 
 final petRepositoryProvider = Provider<PetRepository>(
@@ -87,9 +104,26 @@ final mediaRepositoryProvider = Provider<MediaRepository>(
   (ref) => MediaRepositoryImpl(ref.watch(mediaApiProvider)),
 );
 
+// Notifications Dio (baseUrl: /api para que /notifications resuelva /api/notifications)
+final notificationsDioProvider = Provider<Dio>((ref) {
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: EnvConfig.notificationsApiUrl.replaceAll('/notifications', ''),
+      connectTimeout: ApiConstants.connectTimeout,
+      receiveTimeout: ApiConstants.receiveTimeout,
+    ),
+  );
+  dio.interceptors.add(
+    AuthInterceptor(ref.watch(firebaseAuthDataSourceProvider)),
+  );
+  return dio;
+});
+
 // Notifications
-final notificationsApiProvider = Provider(
-  (ref) => NotificationsApiDataSource(ref.watch(dioProvider)),
+final notificationsApiProvider = Provider<NotificationsApiDataSource>(
+  (ref) => NotificationsApiDataSource(
+    ref.watch(notificationsDioProvider),
+  ),
 );
 
 final notificationRepositoryProvider = Provider<NotificationRepository>(
@@ -122,5 +156,13 @@ final chatRepositoryProvider = Provider<ChatRepository>(
     ref.watch(chatGraphQLProvider),
     ref.watch(chatWebSocketProvider),
     ref.watch(firebaseAuthDataSourceProvider),
+  ),
+);
+
+// FCM
+final fcmServiceProvider = Provider<FcmService>(
+  (ref) => FcmService(
+    notificationsApi: ref.watch(notificationsApiProvider),
+    navigatorKey: rootNavigatorKey,
   ),
 );
